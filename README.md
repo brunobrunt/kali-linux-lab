@@ -159,6 +159,21 @@ The objective is to prevent resource conflicts and protect HavenBridge workloads
 - System configuration: Ansible
 - Kubernetes administration: `eph-cp01`, not `syrus`
 
+### A — Action
+
+Inspect and verify host resources, routes, libvirt networks, and storage
+before provisioning any Kali resources.
+
+### F — Format and Evidence
+
+Maintain host-labelled commands, observed results, planned choices, and
+verification status in this README.
+
+### T — Tone and ELI10 Explanation
+
+Explain each flag and concept in simple language; a separate subnet is not
+by itself proof of network isolation.
+
 ### Verified host resources
 
 | Resource | Observed result |
@@ -248,20 +263,6 @@ authenticity and integrity, and inspect its suitability for automated provisioni
 
 
 
-### A — Action
-
-Inspect and verify host resources, routes, libvirt networks, and storage
-before provisioning any Kali resources.
-
-### F — Format and Evidence
-
-Maintain host-labelled commands, observed results, planned choices, and
-verification status in this README.
-
-### T — Tone and ELI10 Explanation
-
-Explain each flag and concept in simple language; a separate subnet is not
-by itself proof of network isolation.
 ## 9. Evidence
 
 Screenshots and diagrams will be stored under:
