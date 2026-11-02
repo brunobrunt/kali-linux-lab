@@ -1,0 +1,58 @@
+# Terraform state, state backups, local caches, and machine-specific vars
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+crash.log
+crash.*.log
+.terraform.tfstate.lock.info
+*.tfplan
+
+# Credentials, identity, and local secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+*.kubeconfig
+kubeconfig
+secrets/
+
+# VM images and heavy build/download artifacts
+*.qcow2
+*.qcow2.xz
+*.qcow2.gz
+*.vmdk
+*.vdi
+*.vhd
+*.vhdx
+*.iso
+*.ova
+*.ovf
+*.img
+*.img.xz
+*.7z
+
+# Ansible transient files
+*.retry
+.ansible/
+
+# Python and editors
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.vscode/
+.idea/
+*.swp
+*~
+
+# Local notes and backups
+*.bak
+*.backup
