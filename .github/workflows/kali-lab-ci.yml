@@ -31,7 +31,7 @@ jobs:
     steps:
       # ELI10: Download the repository onto the CI runner.
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # ELI10: Confirm the main README exists and contains text.
       - name: Check documentation

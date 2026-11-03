@@ -233,6 +233,64 @@ Fix the underlying issue, commit the correction, and push again.
 
 Create `.github/workflows/kali-lab-ci.yml` on `syrus`.
 
-Then inspect the file, validate the workflow, commit it to `feature/kali-ai-lab`, and observe the actual results on Draft PR #1.
+---
 
-Update this guide with the verified outcome and any troubleshooting evidence.
+## 12. Troubleshooting — GitHub Actions Node.js Deprecation Warning
+
+**Date:** November 3, 2026
+
+### Problem
+
+Our first Kali Lab CI workflow completed successfully, but GitHub reported a warning.
+
+**Observed warning:**
+
+`Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4.`
+
+### Root Cause
+
+The workflow used `actions/checkout@v4`, which targeted Node.js 20.
+
+GitHub's runner environment is transitioning away from Node.js 20.
+
+### Corrective Action
+
+Updated the GitHub Actions workflow:
+
+```yaml
+# Before
+uses: actions/checkout@v4
+
+# After
+uses: actions/checkout@v6
+```
+
+### ELI10 Explanation
+
+GitHub Actions uses reusable components called *actions*.
+
+`actions/checkout` is responsible for making repository files available to the temporary GitHub runner.
+
+The older action version used an outdated Node.js runtime.
+
+Upgrading the action allows us to use a version designed for newer runner environments.
+
+We did not need to install or upgrade Node.js on `syrus`, because this workflow runs on GitHub-hosted infrastructure.
+
+### Local Verification
+
+- Confirmed `actions/checkout@v6` appears in the workflow.
+- Ran `git diff --check` without whitespace errors.
+- Reviewed the Git diff and confirmed the intended version change.
+
+### CI Verification
+
+**Status: PENDING**
+
+After committing and pushing the workflow change, inspect the new GitHub Actions run.
+
+Confirm that Documentation Validation passes and the Node.js deprecation warning is absent.
+
+### Lesson Learned
+
+A successful CI workflow can still contain warnings. Always inspect annotations and job logs, investigate deprecated dependencies, and verify corrective actions through a new CI execution.
