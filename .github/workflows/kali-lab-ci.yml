@@ -1,0 +1,61 @@
+# ELI10: This name appears in GitHub's Actions tab.
+name: Kali Lab CI
+
+# ELI10: These events tell GitHub when to run the workflow.
+'on':
+  # Run when we push code to our feature branch.
+  push:
+    branches:
+      - feature/kali-ai-lab
+
+  # Run when a pull request targets main.
+  pull_request:
+    branches:
+      - main
+
+  # Allow manually starting the workflow.
+  workflow_dispatch:
+
+# ELI10: Give the workflow read-only repository access.
+permissions:
+  contents: read
+
+jobs:
+  documentation:
+    # ELI10: This is the name displayed for this CI job.
+    name: Documentation Validation
+
+    # ELI10: Use a temporary GitHub-hosted Ubuntu machine.
+    runs-on: ubuntu-24.04
+
+    steps:
+      # ELI10: Download the repository onto the CI runner.
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # ELI10: Confirm the main README exists and contains text.
+      - name: Check documentation
+        run: |
+          set -euo pipefail
+          test -s README.md
+          echo "PASS: README.md is present and non-empty."
+
+      # ELI10: Verify our permanent learning guide exists and is not empty.
+      - name: Check ELI10 documentation
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -s docs/eli10/02-github-actions-ci.md
+
+          echo "PASS: ELI10 GitHub Actions guide exists."
+
+      # ELI10: Verify the checked-out commit has no whitespace errors.
+      - name: Check Git whitespace
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git show --format= --check HEAD
+
+          echo "PASS: Git commit whitespace check."
