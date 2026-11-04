@@ -283,9 +283,31 @@ We did not need to install or upgrade Node.js on `syrus`, because this workflow 
 - Ran `git diff --check` without whitespace errors.
 - Reviewed the Git diff and confirmed the intended version change.
 
+
 ### CI Verification
 
-**Status: PENDING**
+**Status: PASS — November 3, 2026**
+
+- Workflow: Kali Lab CI
+- Commit: `0b52236`
+- Run ID: `41677329683`
+- Job: Documentation Validation
+- Result: SUCCESS
+- GitHub API annotations: `[]` (none returned)
+- Node.js 20 deprecation warning: No longer reported for the inspected job
+
+**Verification commands (HOST: `syrus`):**
+
+```bash
+gh run view 41677329683 \
+  --repo brunobrunt/kali-linux-lab \
+  --json conclusion,headSha,jobs
+
+gh api \
+  repos/brunobrunt/kali-linux-lab/check-runs/126061363381/annotations
+```
+
+**Outcome:** Upgrading `actions/checkout@v4` to `actions/checkout@v6` resolved the observed warning. The workflow completed successfully without reported annotations.
 
 After committing and pushing the workflow change, inspect the new GitHub Actions run.
 
