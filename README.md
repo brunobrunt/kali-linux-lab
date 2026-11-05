@@ -143,6 +143,25 @@ Use clear, beginner-friendly explanations without overstating outcomes.
 A Git worktree is another working folder linked to the same repository;
 a standalone repository owns its own Git history and remote.
 
+
+### GitHub Branch Protection — Verified November 4, 2026
+
+The standalone Kali Linux Lab repository protects `main` using GitHub ruleset `26572578` (`Protect main — Kali Linux Lab`).
+
+Verified requirements:
+
+- Pull request required before merging.
+- Required CI check: `Documentation Validation`.
+- Branch must be up to date before merging.
+- Review conversations must be resolved.
+- Force pushes and branch deletion are restricted.
+- Required approving reviews: 0 (solo learning repository).
+
+**Verification:** GitHub CLI inspection confirmed that the ruleset targets `refs/heads/main` and has `enforcement: active`.
+
+**Scope:** This protects the repository workflow. It does not validate Terraform, Ansible, or network isolation; those checks are still planned.
+
+
 ## 8. Phase 1 — Infrastructure and Network Assessment
 
 ### C — Context

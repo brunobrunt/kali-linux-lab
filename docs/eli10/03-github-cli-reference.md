@@ -116,3 +116,103 @@ Whenever a new `gh` command is introduced:
 5. Commit updates on `feature/kali-ai-lab`, push them to standalone Kali Draft PR #1, and verify CI before merge.
 
 **Reminder:** Original HavenBridge Draft PR #2 remains independent and must not be merged as part of Kali migration.
+
+---
+
+## 8. GitHub Branch Protection and Rulesets
+
+### Purpose
+
+Protect the Kali Linux Lab `main` branch by requiring pull requests and successful CI checks before merging.
+
+**Verified:** November 4, 2026
+
+**Repository:** `brunobrunt/kali-linux-lab`
+
+**Ruleset:** `26572578` — Protect main — Kali Linux Lab
+
+### ELI10 — What is a ruleset?
+
+A GitHub ruleset is like a security guard protecting an important branch.
+
+It determines what developers must do before changing that branch.
+
+### Terminal — GitHub CLI
+
+**HOST: `syrus`**
+
+List repository rulesets:
+
+```bash
+gh api repos/brunobrunt/kali-linux-lab/rulesets
+```
+
+Inspect our specific ruleset:
+
+```bash
+gh api \
+  repos/brunobrunt/kali-linux-lab/rulesets/26572578 \
+  --jq '{name, enforcement, conditions, rules}'
+```
+
+Check legacy branch protection:
+
+```bash
+gh api \
+  repos/brunobrunt/kali-linux-lab/branches/main/protection
+```
+
+**Important flags and concepts:**
+
+- `gh api` sends an authenticated request to GitHub's REST API.
+- `repos/OWNER/REPOSITORY/rulesets` identifies the repository's rulesets.
+- `--jq` filters JSON output.
+- `enforcement` shows whether a ruleset is active.
+- `conditions` shows the branches targeted.
+- `rules` shows the restrictions.
+
+### GitHub Web Equivalent
+
+1. Open the Kali Linux Lab repository.
+2. Select Settings.
+3. Select Rules → Rulesets.
+4. Open Protect main — Kali Linux Lab.
+5. Review its enforcement, target branches and required checks.
+
+### Verified Rules
+
+| Rule | Value |
+|---|---|
+| Enforcement | Active |
+| Target | `refs/heads/main` |
+| Restrict deletions | Enabled |
+| Block force pushes | Enabled |
+| Require pull request | Enabled |
+| Required approvals | 0 |
+| Resolve review conversations | Required |
+| Required CI | Documentation Validation |
+| Require up-to-date branch | Enabled |
+
+### Troubleshooting — HTTP 404
+
+When inspecting legacy branch protection, GitHub returned:
+
+`404 Branch not protected`
+
+This was expected because no legacy branch protection configuration existed.
+
+We subsequently created a GitHub ruleset instead.
+
+**ELI10:** GitHub rulesets and legacy branch protection are separate mechanisms. A legacy protection endpoint returning 404 does not establish that no ruleset exists.
+
+### Lessons Learned
+
+- Rulesets protect Git branches.
+- A required status check references a GitHub Actions job.
+- Passing CI and having an active ruleset are separate requirements.
+- Ruleset configuration must be verified after saving.
+- Repository protection does not automatically validate Terraform, Ansible or network isolation.
+
+### Future Updates
+
+Add new GitHub CLI commands, important flags, browser equivalents and verified outcomes here as the project progresses.
