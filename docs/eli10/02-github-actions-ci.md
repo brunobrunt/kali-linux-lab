@@ -387,3 +387,65 @@ Record the GitHub Actions run IDs and any warnings or failures.
 This workflow does not execute `terraform apply`, connect to `syrus`, or provision infrastructure.
 
 The existing `kali-ai-net` network remains managed by local Terraform state on `syrus`.
+
+---
+
+## 14. Troubleshooting — Terraform GitHub Action Node.js Warning
+
+**Date:** November 6, 2026
+
+### Problem
+
+The Kali Lab CI workflow completed successfully, including the Terraform Validation job, but GitHub reported a Node.js 20 deprecation warning associated with `hashicorp/setup-terraform@v3`.
+
+### Evidence
+
+- Workflow run: `42168293352`
+- Terraform Validation job: `127729842707`
+- Documentation Validation: PASS
+- Terraform Validation: PASS
+- Warning: Node.js 20 deprecated for `hashicorp/setup-terraform@v3`
+
+### Root Cause
+
+The older Terraform setup action targeted Node.js 20, which GitHub Actions is phasing out.
+
+This warning concerns the GitHub Action runtime, not the Terraform CLI version or the libvirt network on `syrus`.
+
+### Corrective Action
+
+Updated `.github/workflows/kali-lab-ci.yml`:
+
+```yaml
+# Previous action
+uses: hashicorp/setup-terraform@v3
+
+# Updated action
+uses: hashicorp/setup-terraform@v4
+```
+
+Kept Terraform CLI pinned to version `1.16.1`.
+
+### Local Verification
+
+- Confirmed `hashicorp/setup-terraform@v4` is configured.
+- Confirmed `actions/checkout@v6` remains unchanged.
+- Confirmed Terraform CLI version remains `1.16.1`.
+- `git diff --check` passed.
+- Git diff showed only the intended action-version update.
+
+### GitHub CI Verification
+
+**Status: PENDING**
+
+After committing and pushing, verify:
+
+1. Documentation Validation passes.
+2. Terraform Validation passes.
+3. No Node.js deprecation warning appears in the new run's annotations.
+
+### Lesson Learned
+
+A successful CI workflow may still produce dependency warnings.
+
+Always investigate the exact component responsible, update it safely, and verify the result with a new CI execution.
