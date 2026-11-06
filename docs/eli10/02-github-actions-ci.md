@@ -316,3 +316,74 @@ Confirm that Documentation Validation passes and the Node.js deprecation warning
 ### Lesson Learned
 
 A successful CI workflow can still contain warnings. Always inspect annotations and job logs, investigate deprecated dependencies, and verify corrective actions through a new CI execution.
+
+
+---
+
+## 13. Terraform Validation in GitHub Actions
+
+**Date:** November 5, 2026
+
+**Status:** Locally validated — GitHub CI execution pending.
+
+### Purpose
+
+Extend Kali Lab CI with a dedicated Terraform Validation job.
+
+This job inspects Terraform configuration files without creating or modifying infrastructure.
+
+### Workflow configuration
+
+File: `.github/workflows/kali-lab-ci.yml`
+
+The workflow now defines two jobs:
+
+| Job | Responsibility |
+|---|---|
+| Documentation Validation | Check required documentation and Git whitespace |
+| Terraform Validation | Check Terraform formatting and configuration validity |
+
+### Terraform Validation steps
+
+1. **Check out repository:** Make the source files available on GitHub's runner.
+2. **Set up Terraform:** Install Terraform 1.16.1.
+3. **Check Terraform formatting:** Run `terraform fmt -check -recursive terraform/`.
+4. **Initialize Terraform:** Run `terraform -chdir=terraform init -backend=false -lockfile=readonly`.
+5. **Validate Terraform:** Run `terraform -chdir=terraform validate -no-color`.
+
+### ELI10 command explanations
+
+| Command or flag | Meaning |
+|---|---|
+| `hashicorp/setup-terraform@v3` | Prepare Terraform on the GitHub runner |
+| `terraform_version` | Select the required Terraform version |
+| `fmt -check` | Verify formatting without modifying configuration |
+| `-recursive` | Include Terraform files in nested directories |
+| `-chdir=terraform` | Run the command inside the Terraform directory |
+| `init -backend=false` | Initialize providers without backend initialization |
+| `-lockfile=readonly` | Prevent changes to the committed provider lock file |
+| `validate -no-color` | Validate configuration without terminal colour codes |
+
+### Local verification
+
+On `syrus`, the following checks passed:
+
+- `git diff --check`
+- Python YAML parsing with PyYAML
+- Detection of the `documentation` and `terraform` jobs
+- Verification that both jobs contain runner and step definitions
+- Visual inspection of YAML indentation
+
+### GitHub CI verification
+
+**Status: PENDING**
+
+After committing and pushing, confirm that both Documentation Validation and Terraform Validation finish successfully.
+
+Record the GitHub Actions run IDs and any warnings or failures.
+
+### Security
+
+This workflow does not execute `terraform apply`, connect to `syrus`, or provision infrastructure.
+
+The existing `kali-ai-net` network remains managed by local Terraform state on `syrus`.

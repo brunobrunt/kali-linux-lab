@@ -281,6 +281,40 @@ Select and download the official Kali Linux QEMU image, verify its
 authenticity and integrity, and inspect its suitability for automated provisioning.
 
 
+### Phase 2 — Terraform Network Provisioning
+
+**Status:** Network created and libvirt configuration verified — November 5, 2026.
+
+**Execution host:** `syrus`
+**Provisioning:** Terraform v1.16.1 with `dmacvicar/libvirt` v0.9.8.
+
+#### Verified network configuration
+
+| Property | Value |
+|---|---|
+| Network | `kali-ai-net` |
+| Subnet | `192.168.88.0/24` |
+| Gateway | `192.168.88.1` |
+| Bridge | `virbr88` |
+| DHCP | `192.168.88.100–199` |
+| Autostart | Enabled |
+| Persistent | Yes |
+| Libvirt forwarding | No forwarding element |
+
+#### Implementation results
+
+- `terraform init`: Successful.
+- `terraform validate`: Successful.
+- `terraform plan`: 1 to add, 0 to change, 0 to destroy.
+- `terraform apply`: 1 added, 0 changed, 0 destroyed.
+- `virsh net-info`: Network active, persistent and set to autostart.
+- `virsh net-dumpxml`: Bridge, gateway and DHCP configuration verified.
+- `terraform state list`: `libvirt_network.kali_lab`.
+- Git state and saved plan exclusions: Verified.
+
+**Security limitation:** Guest isolation and host firewall behaviour have not yet been tested. Network creation does not establish that security testing is safe.
+
+**ELI10 documentation:** [Guide 04 — Terraform and KVM/libvirt](docs/eli10/04-terraform.md).
 
 ## 9. Evidence
 

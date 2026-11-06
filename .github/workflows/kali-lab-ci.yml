@@ -59,3 +59,31 @@ jobs:
           git show --format= --check HEAD
 
           echo "PASS: Git commit whitespace check."
+
+  # ELI10: Inspect Terraform configuration without creating infrastructure.
+  terraform:
+    name: Terraform Validation
+    runs-on: ubuntu-24.04
+
+    steps:
+      # ELI10: Download the Kali Lab source files.
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      # ELI10: Install the Terraform CLI on GitHub's runner.
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.16.1"
+
+      # ELI10: Verify consistent Terraform formatting.
+      - name: Check Terraform formatting
+        run: terraform fmt -check -recursive terraform/
+
+      # ELI10: Download the locked provider without initializing a backend.
+      - name: Initialize Terraform
+        run: terraform -chdir=terraform init -backend=false -lockfile=readonly
+
+      # ELI10: Check Terraform configuration for errors.
+      - name: Validate Terraform
+        run: terraform -chdir=terraform validate -no-color
