@@ -143,6 +143,25 @@ Use clear, beginner-friendly explanations without overstating outcomes.
 A Git worktree is another working folder linked to the same repository;
 a standalone repository owns its own Git history and remote.
 
+
+### GitHub Branch Protection — Verified November 4, 2026
+
+The standalone Kali Linux Lab repository protects `main` using GitHub ruleset `26572578` (`Protect main — Kali Linux Lab`).
+
+Verified requirements:
+
+- Pull request required before merging.
+- Required CI check: `Documentation Validation`.
+- Branch must be up to date before merging.
+- Review conversations must be resolved.
+- Force pushes and branch deletion are restricted.
+- Required approving reviews: 0 (solo learning repository).
+
+**Verification:** GitHub CLI inspection confirmed that the ruleset targets `refs/heads/main` and has `enforcement: active`.
+
+**Scope:** This protects the repository workflow. It does not validate Terraform, Ansible, or network isolation; those checks are still planned.
+
+
 ## 8. Phase 1 — Infrastructure and Network Assessment
 
 ### C — Context
@@ -158,6 +177,21 @@ The objective is to prevent resource conflicts and protect HavenBridge workloads
 - Infrastructure provisioning: Terraform
 - System configuration: Ansible
 - Kubernetes administration: `eph-cp01`, not `syrus`
+
+### A — Action
+
+Inspect and verify host resources, routes, libvirt networks, and storage
+before provisioning any Kali resources.
+
+### F — Format and Evidence
+
+Maintain host-labelled commands, observed results, planned choices, and
+verification status in this README.
+
+### T — Tone and ELI10 Explanation
+
+Explain each flag and concept in simple language; a separate subnet is not
+by itself proof of network isolation.
 
 ### Verified host resources
 
@@ -247,21 +281,41 @@ Select and download the official Kali Linux QEMU image, verify its
 authenticity and integrity, and inspect its suitability for automated provisioning.
 
 
+### Phase 2 — Terraform Network Provisioning
 
-### A — Action
+**Status:** Network created and libvirt configuration verified — November 5, 2026.
 
-Inspect and verify host resources, routes, libvirt networks, and storage
-before provisioning any Kali resources.
+**Execution host:** `syrus`
+**Provisioning:** Terraform v1.16.1 with `dmacvicar/libvirt` v0.9.8.
 
-### F — Format and Evidence
+#### Verified network configuration
 
-Maintain host-labelled commands, observed results, planned choices, and
-verification status in this README.
+| Property | Value |
+|---|---|
+| Network | `kali-ai-net` |
+| Subnet | `192.168.88.0/24` |
+| Gateway | `192.168.88.1` |
+| Bridge | `virbr88` |
+| DHCP | `192.168.88.100–199` |
+| Autostart | Enabled |
+| Persistent | Yes |
+| Libvirt forwarding | No forwarding element |
 
-### T — Tone and ELI10 Explanation
+#### Implementation results
 
-Explain each flag and concept in simple language; a separate subnet is not
-by itself proof of network isolation.
+- `terraform init`: Successful.
+- `terraform validate`: Successful.
+- `terraform plan`: 1 to add, 0 to change, 0 to destroy.
+- `terraform apply`: 1 added, 0 changed, 0 destroyed.
+- `virsh net-info`: Network active, persistent and set to autostart.
+- `virsh net-dumpxml`: Bridge, gateway and DHCP configuration verified.
+- `terraform state list`: `libvirt_network.kali_lab`.
+- Git state and saved plan exclusions: Verified.
+
+**Security limitation:** Guest isolation and host firewall behaviour have not yet been tested. Network creation does not establish that security testing is safe.
+
+**ELI10 documentation:** [Guide 04 — Terraform and KVM/libvirt](docs/eli10/04-terraform.md).
+
 ## 9. Evidence
 
 Screenshots and diagrams will be stored under:
