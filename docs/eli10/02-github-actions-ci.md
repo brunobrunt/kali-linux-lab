@@ -436,13 +436,17 @@ Kept Terraform CLI pinned to version `1.16.1`.
 
 ### GitHub CI Verification
 
-**Status: PENDING**
+**Status: PASS — November 7, 2026**
 
-After committing and pushing, verify:
+- Commit: `80be92b`
+- Workflow run: `42234579641`
+- Documentation Validation: PASS
+- Terraform Validation: PASS
+- Terraform job annotations: `[]`
+- Node.js 20 warning: No longer reported for the inspected job
 
-1. Documentation Validation passes.
-2. Terraform Validation passes.
-3. No Node.js deprecation warning appears in the new run's annotations.
+**Branch protection:** Both CI jobs are now
+required by ruleset `26572578`.
 
 ### Lesson Learned
 

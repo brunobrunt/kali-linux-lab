@@ -161,6 +161,29 @@ Check legacy branch protection:
 gh api \
   repos/brunobrunt/kali-linux-lab/branches/main/protection
 ```
+#### List required GitHub Actions checks
+
+**HOST: `syrus`**
+
+```bash
+gh api \
+  repos/brunobrunt/kali-linux-lab/rulesets/26572578 \
+  --jq '.rules[] | select(.type == "required_status_checks") | .parameters.required_status_checks'
+```
+
+**ELI10:**
+- `gh api` queries GitHub using our authenticated CLI.
+- `--jq` filters the returned JSON.
+- `.rules[]` examines the saved rules.
+- `select(...)` finds the required status checks rule.
+- `.parameters.required_status_checks` displays the mandatory CI checks.
+
+**Verified November 7, 2026:**
+- `Documentation Validation` — Required.
+- `Terraform Validation` — Required.
+- GitHub Actions integration ID: `15368`.
+
+**GitHub Web:** Settings → Rules → Rulesets → Protect main — Kali Linux Lab → Required status checks.
 
 **Important flags and concepts:**
 

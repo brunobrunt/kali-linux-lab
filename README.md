@@ -151,7 +151,7 @@ The standalone Kali Linux Lab repository protects `main` using GitHub ruleset `2
 Verified requirements:
 
 - Pull request required before merging.
-- Required CI check: `Documentation Validation`.
+- Required CI checks: `Documentation Validation` and `Terraform Validation`.
 - Branch must be up to date before merging.
 - Review conversations must be resolved.
 - Force pushes and branch deletion are restricted.
