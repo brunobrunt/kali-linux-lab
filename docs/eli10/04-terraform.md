@@ -209,3 +209,90 @@ Add Terraform validation to Kali Lab CI.
 Then verify the GitHub Actions results before beginning Kali VM provisioning.
 
 Continue documenting actual outcomes in this guide and the root `README.md`.
+
+## Terraform CLI Upgrade — 1.16.1 to 1.17.1
+
+**Date:** November 9, 2026
+**Host:** `syrus`
+
+### Purpose
+
+Upgrade the Terraform CLI while preserving our existing Kali Linux Lab infrastructure and validating compatibility with the HavenBridge Terraform configurations.
+
+### Why we upgraded
+
+Terraform 1.16.1 reported that version 1.17.1 was available.
+
+Before upgrading, we repaired the HashiCorp APT repository signing-key configuration after encountering the `NO_PUBKEY FC9CA96ACA026560` warning.
+
+### Commands used
+
+**HOST: `syrus`**
+
+```bash
+apt-cache policy terraform
+
+sudo apt-get -s install terraform=1.17.1-1
+
+sudo apt-get install terraform=1.17.1-1
+
+terraform version
+```
+
+**ELI10:**
+
+- `apt-cache policy` displays available package versions.
+- `apt-get -s` simulates installation without making changes.
+- `terraform=1.17.1-1` selects an exact package version.
+- `terraform version` confirms the installed version.
+
+### Verified Kali Linux Lab results
+
+```text
+Terraform v1.17.1
+on linux_amd64
+
+Success! The configuration is valid.
+
+libvirt_network.kali_lab
+libvirt_pool.kali_ai
+
+No changes. Your infrastructure matches the configuration.
+```
+
+The installed `dmacvicar/libvirt` provider was retained.
+
+### HavenBridge compatibility checks
+
+Both HavenBridge configurations passed Terraform formatting and validation using Terraform 1.17.1:
+
+- `terraform/libvirt`
+- `terraform/libvirt/cd-runner`
+
+No HavenBridge infrastructure changes were applied.
+
+The HavenBridge version requirement remains:
+
+```hcl
+required_version = ">= 1.0.0, < 2.0.0"
+```
+
+### GitHub Actions alignment
+
+Updated `.github/workflows/kali-lab-ci.yml`:
+
+```yaml
+uses: hashicorp/setup-terraform@v4
+with:
+  terraform_version: "1.17.1"
+```
+
+**GitHub CI verification:** Pending the next push.
+
+### Lessons learned
+
+Terraform CLI versions and provider versions are separate.
+
+Always simulate package upgrades, validate configurations and review Terraform plans before considering infrastructure changes.
+
+A successful local Terraform validation does not replace GitHub Actions CI verification.
