@@ -331,3 +331,47 @@ After the initial standalone `main` commit and push, create a task feature
 branch, open a draft pull request, and require passing relevant CI checks
 before merging into protected `main`. Do not push ongoing development
 directly to `main`. Branch protection and Kali-specific CI remain to be configured.
+
+## Phase 3 — Kali Linux VM and Storage Provisioning
+
+**Status:** In progress
+
+### Objective
+
+Provision a dedicated Kali Linux virtual machine using Terraform and native KVM/libvirt on `syrus`, while preserving the existing HavenBridge Kubernetes and Crafty Performance Lab environments.
+
+### Completed — Storage provisioning
+
+- Created Terraform-managed storage pool: `kali-ai-pool`.
+- Storage directory: `/data_all/libvirt/kali-ai`.
+- Pool type: directory (`dir`).
+- Ownership: `libvirt-qemu:kvm`.
+- Permissions: `0770`.
+- Pool is running, persistent, and configured for autostart.
+- Verified the pool using `virsh`, filesystem permissions, and Terraform state.
+
+**Storage clarification:** The reported 1.58 TiB available is shared free capacity on `/data_all`. It is not reserved exclusively for Kali.
+
+### Planned — Kali virtual machine
+
+- VM name: `kali-ai`.
+- CPU: 2 vCPUs.
+- Memory: 4 GiB RAM.
+- Virtual disk: 60 GiB (not yet created).
+- Network: `kali-ai-net` (`192.168.88.0/24`).
+- Provisioning: Terraform.
+- Guest configuration: Ansible.
+
+### Documentation
+
+See [Kali VM Provisioning — ELI10 Guide](docs/eli10/05-kali-vm-provisioning.md).
+
+### Next steps
+
+1. Download the official Kali Linux QEMU/KVM image.
+2. Verify the image's SHA256 checksum.
+3. Provision the Kali VM using Terraform.
+4. Configure the guest using Ansible.
+5. Test network isolation from HavenBridge before security exercises.
+
+**Important:** The Kali VM has not yet been created. Network isolation requires practical verification.
