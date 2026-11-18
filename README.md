@@ -374,4 +374,92 @@ See [Kali VM Provisioning — ELI10 Guide](docs/eli10/05-kali-vm-provisioning.md
 4. Configure the guest using Ansible.
 5. Test network isolation from HavenBridge before security exercises.
 
-**Important:** The Kali VM has not yet been created. Network isolation requires practical verification.
+**Important:** The Kali VM has been provisioned using Terraform and successfully accessed through its graphical console and SSH. Complete network isolation has not yet been verified. Security testing against training targets must remain on hold until isolation checks pass.
+
+
+## Kali-AI Lab — SSH Configuration and Verification
+
+**Host:** `syrus`
+**Configuration:** `/home/alabi/.ssh/config`
+**Result:** PASS — 8 of 8 VM SSH aliases verified.
+
+### Purpose
+
+Configure SSH hostname aliases for the HavenBridge Kubernetes nodes, Crafty Performance Lab VM, and Kali-AI VM.
+
+This allows administrators to connect using `ssh kali-ai` instead of remembering IP addresses, SSH usernames and private-key paths.
+
+### Verified SSH Inventory
+
+| VM | IP address | Username | Private key |
+|---|---|---|---|
+| eph-cp01 | 172.16.10.31 | mino | `~/.ssh/eph_k8s` |
+| eph-cp02 | 172.16.10.32 | mino | `~/.ssh/eph_k8s` |
+| eph-cp03 | 172.16.10.33 | mino | `~/.ssh/eph_k8s` |
+| eph-worker01 | 172.16.10.34 | mino | `~/.ssh/eph_k8s` |
+| eph-worker02 | 172.16.10.35 | mino | `~/.ssh/eph_k8s` |
+| havenbridge-runner01 | 172.16.10.37 | mino | `~/.ssh/eph_k8s` |
+| crafty-perf-01 | 192.168.77.10 | mino | `~/.ssh/eph_k8s` |
+| kali-ai | 192.168.88.185 | mino | `~/.ssh/kali_ai` |
+
+### Verification Procedure
+
+**HOST: `syrus`**
+
+```bash
+# PURPOSE: Verify all eight SSH aliases.
+# SAFETY: Read-only remote identity checks.
+
+for vm in \
+  eph-cp01 \
+  eph-cp02 \
+  eph-cp03 \
+  eph-worker01 \
+  eph-worker02 \
+  havenbridge-runner01 \
+  crafty-perf-01 \
+  kali-ai
+do
+    echo "===== Testing $vm ====="
+
+    ssh \
+      -o BatchMode=yes \
+      -o ConnectTimeout=5 \
+      "$vm" \
+      'whoami && hostname' \
+      || echo "FAILED: $vm"
+
+    echo
+done
+```
+
+### ELI10 — Command Explanation
+
+- `for vm in ...`: Repeats the check for each virtual machine.
+- `ssh`: Opens a secure remote connection.
+- `-o`: Supplies an SSH connection option.
+- `BatchMode=yes`: Disables interactive authentication prompts.
+- `ConnectTimeout=5`: Limits the initial connection wait to five seconds.
+- `"$vm"`: Uses the hostname alias from the SSH configuration.
+- `whoami`: Verifies the remote account.
+- `&&`: Runs the next command only when the previous command succeeds.
+- `hostname`: Verifies the remote computer's identity.
+- `|| echo`: Reports an SSH failure.
+- `done`: Ends the Bash loop.
+
+### Verified Outcome
+
+All eight SSH connections returned username `mino` and their expected VM hostnames.
+
+No failures were reported.
+
+### Security and Operational Notes
+
+- Private SSH keys remain outside the Git repository.
+- Existing GitHub SSH authentication settings were preserved.
+- The Kali network remains separate from the HavenBridge and Crafty libvirt networks.
+- Successful SSH authentication does not prove complete network isolation.
+- Kali currently uses a DHCP-assigned IP address. A stable address or reservation is still required.
+- SSH aliases simplify future Ansible inventory configuration.
+
+**Lessons learned:** Verify SSH identities and connectivity before deploying configuration automation. Preserve existing SSH configuration and record actual results instead of assuming success.
