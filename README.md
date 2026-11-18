@@ -143,6 +143,25 @@ Use clear, beginner-friendly explanations without overstating outcomes.
 A Git worktree is another working folder linked to the same repository;
 a standalone repository owns its own Git history and remote.
 
+
+### GitHub Branch Protection — Verified November 4, 2026
+
+The standalone Kali Linux Lab repository protects `main` using GitHub ruleset `26572578` (`Protect main — Kali Linux Lab`).
+
+Verified requirements:
+
+- Pull request required before merging.
+- Required CI checks: `Documentation Validation` and `Terraform Validation`.
+- Branch must be up to date before merging.
+- Review conversations must be resolved.
+- Force pushes and branch deletion are restricted.
+- Required approving reviews: 0 (solo learning repository).
+
+**Verification:** GitHub CLI inspection confirmed that the ruleset targets `refs/heads/main` and has `enforcement: active`.
+
+**Scope:** This protects the repository workflow. It does not validate Terraform, Ansible, or network isolation; those checks are still planned.
+
+
 ## 8. Phase 1 — Infrastructure and Network Assessment
 
 ### C — Context
@@ -158,6 +177,21 @@ The objective is to prevent resource conflicts and protect HavenBridge workloads
 - Infrastructure provisioning: Terraform
 - System configuration: Ansible
 - Kubernetes administration: `eph-cp01`, not `syrus`
+
+### A — Action
+
+Inspect and verify host resources, routes, libvirt networks, and storage
+before provisioning any Kali resources.
+
+### F — Format and Evidence
+
+Maintain host-labelled commands, observed results, planned choices, and
+verification status in this README.
+
+### T — Tone and ELI10 Explanation
+
+Explain each flag and concept in simple language; a separate subnet is not
+by itself proof of network isolation.
 
 ### Verified host resources
 
@@ -247,21 +281,41 @@ Select and download the official Kali Linux QEMU image, verify its
 authenticity and integrity, and inspect its suitability for automated provisioning.
 
 
+### Phase 2 — Terraform Network Provisioning
 
-### A — Action
+**Status:** Network created and libvirt configuration verified — November 5, 2026.
 
-Inspect and verify host resources, routes, libvirt networks, and storage
-before provisioning any Kali resources.
+**Execution host:** `syrus`
+**Provisioning:** Terraform v1.16.1 with `dmacvicar/libvirt` v0.9.8.
 
-### F — Format and Evidence
+#### Verified network configuration
 
-Maintain host-labelled commands, observed results, planned choices, and
-verification status in this README.
+| Property | Value |
+|---|---|
+| Network | `kali-ai-net` |
+| Subnet | `192.168.88.0/24` |
+| Gateway | `192.168.88.1` |
+| Bridge | `virbr88` |
+| DHCP | `192.168.88.100–199` |
+| Autostart | Enabled |
+| Persistent | Yes |
+| Libvirt forwarding | No forwarding element |
 
-### T — Tone and ELI10 Explanation
+#### Implementation results
 
-Explain each flag and concept in simple language; a separate subnet is not
-by itself proof of network isolation.
+- `terraform init`: Successful.
+- `terraform validate`: Successful.
+- `terraform plan`: 1 to add, 0 to change, 0 to destroy.
+- `terraform apply`: 1 added, 0 changed, 0 destroyed.
+- `virsh net-info`: Network active, persistent and set to autostart.
+- `virsh net-dumpxml`: Bridge, gateway and DHCP configuration verified.
+- `terraform state list`: `libvirt_network.kali_lab`.
+- Git state and saved plan exclusions: Verified.
+
+**Security limitation:** Guest isolation and host firewall behaviour have not yet been tested. Network creation does not establish that security testing is safe.
+
+**ELI10 documentation:** [Guide 04 — Terraform and KVM/libvirt](docs/eli10/04-terraform.md).
+
 ## 9. Evidence
 
 Screenshots and diagrams will be stored under:
@@ -277,3 +331,135 @@ After the initial standalone `main` commit and push, create a task feature
 branch, open a draft pull request, and require passing relevant CI checks
 before merging into protected `main`. Do not push ongoing development
 directly to `main`. Branch protection and Kali-specific CI remain to be configured.
+
+## Phase 3 — Kali Linux VM and Storage Provisioning
+
+**Status:** In progress
+
+### Objective
+
+Provision a dedicated Kali Linux virtual machine using Terraform and native KVM/libvirt on `syrus`, while preserving the existing HavenBridge Kubernetes and Crafty Performance Lab environments.
+
+### Completed — Storage provisioning
+
+- Created Terraform-managed storage pool: `kali-ai-pool`.
+- Storage directory: `/data_all/libvirt/kali-ai`.
+- Pool type: directory (`dir`).
+- Ownership: `libvirt-qemu:kvm`.
+- Permissions: `0770`.
+- Pool is running, persistent, and configured for autostart.
+- Verified the pool using `virsh`, filesystem permissions, and Terraform state.
+
+**Storage clarification:** The reported 1.58 TiB available is shared free capacity on `/data_all`. It is not reserved exclusively for Kali.
+
+### Planned — Kali virtual machine
+
+- VM name: `kali-ai`.
+- CPU: 2 vCPUs.
+- Memory: 4 GiB RAM.
+- Virtual disk: 60 GiB (not yet created).
+- Network: `kali-ai-net` (`192.168.88.0/24`).
+- Provisioning: Terraform.
+- Guest configuration: Ansible.
+
+### Documentation
+
+See [Kali VM Provisioning — ELI10 Guide](docs/eli10/05-kali-vm-provisioning.md).
+
+### Next steps
+
+1. Download the official Kali Linux QEMU/KVM image.
+2. Verify the image's SHA256 checksum.
+3. Provision the Kali VM using Terraform.
+4. Configure the guest using Ansible.
+5. Test network isolation from HavenBridge before security exercises.
+
+**Important:** The Kali VM has been provisioned using Terraform and successfully accessed through its graphical console and SSH. Complete network isolation has not yet been verified. Security testing against training targets must remain on hold until isolation checks pass.
+
+
+## Kali-AI Lab — SSH Configuration and Verification
+
+**Host:** `syrus`
+**Configuration:** `/home/alabi/.ssh/config`
+**Result:** PASS — 8 of 8 VM SSH aliases verified.
+
+### Purpose
+
+Configure SSH hostname aliases for the HavenBridge Kubernetes nodes, Crafty Performance Lab VM, and Kali-AI VM.
+
+This allows administrators to connect using `ssh kali-ai` instead of remembering IP addresses, SSH usernames and private-key paths.
+
+### Verified SSH Inventory
+
+| VM | IP address | Username | Private key |
+|---|---|---|---|
+| eph-cp01 | 172.16.10.31 | mino | `~/.ssh/eph_k8s` |
+| eph-cp02 | 172.16.10.32 | mino | `~/.ssh/eph_k8s` |
+| eph-cp03 | 172.16.10.33 | mino | `~/.ssh/eph_k8s` |
+| eph-worker01 | 172.16.10.34 | mino | `~/.ssh/eph_k8s` |
+| eph-worker02 | 172.16.10.35 | mino | `~/.ssh/eph_k8s` |
+| havenbridge-runner01 | 172.16.10.37 | mino | `~/.ssh/eph_k8s` |
+| crafty-perf-01 | 192.168.77.10 | mino | `~/.ssh/eph_k8s` |
+| kali-ai | 192.168.88.185 | mino | `~/.ssh/kali_ai` |
+
+### Verification Procedure
+
+**HOST: `syrus`**
+
+```bash
+# PURPOSE: Verify all eight SSH aliases.
+# SAFETY: Read-only remote identity checks.
+
+for vm in \
+  eph-cp01 \
+  eph-cp02 \
+  eph-cp03 \
+  eph-worker01 \
+  eph-worker02 \
+  havenbridge-runner01 \
+  crafty-perf-01 \
+  kali-ai
+do
+    echo "===== Testing $vm ====="
+
+    ssh \
+      -o BatchMode=yes \
+      -o ConnectTimeout=5 \
+      "$vm" \
+      'whoami && hostname' \
+      || echo "FAILED: $vm"
+
+    echo
+done
+```
+
+### ELI10 — Command Explanation
+
+- `for vm in ...`: Repeats the check for each virtual machine.
+- `ssh`: Opens a secure remote connection.
+- `-o`: Supplies an SSH connection option.
+- `BatchMode=yes`: Disables interactive authentication prompts.
+- `ConnectTimeout=5`: Limits the initial connection wait to five seconds.
+- `"$vm"`: Uses the hostname alias from the SSH configuration.
+- `whoami`: Verifies the remote account.
+- `&&`: Runs the next command only when the previous command succeeds.
+- `hostname`: Verifies the remote computer's identity.
+- `|| echo`: Reports an SSH failure.
+- `done`: Ends the Bash loop.
+
+### Verified Outcome
+
+All eight SSH connections returned username `mino` and their expected VM hostnames.
+
+No failures were reported.
+
+### Security and Operational Notes
+
+- Private SSH keys remain outside the Git repository.
+- Existing GitHub SSH authentication settings were preserved.
+- The Kali network remains separate from the HavenBridge and Crafty libvirt networks.
+- Successful SSH authentication does not prove complete network isolation.
+- Kali currently uses a DHCP-assigned IP address. A stable address or reservation is still required.
+- SSH aliases simplify future Ansible inventory configuration.
+
+**Lessons learned:** Verify SSH identities and connectivity before deploying configuration automation. Preserve existing SSH configuration and record actual results instead of assuming success.
